@@ -16,6 +16,7 @@ pipeline {
                 sh "docker-compose down && docker-compose up -d"
             }
         }
+      }
       environment {
         AWS_ACCOUNT_ID="168546287356"
         AWS_DEFAULT_REGION="us-east-1"
