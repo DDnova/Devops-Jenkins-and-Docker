@@ -50,7 +50,7 @@ pipeline {
 
         // Update the service on ECS to use the new task definition
 
-        sh "aws ecs update-service --cluster ${CLUSTER_NAME} --service ${SERVICE_NAME}  --desired-count ${DESIRED_COUNT} --task-definition ${TASK_DEFINITION_NAME} --force-new-deployment"
+        sh "aws ecs update-service --cluster ${CLUSTER_NAME} --service ${SERVICE_NAME}  --desired-count ${DESIRED_COUNT} --task-definition ${TASK_DEFINITION_NAME} --force-new-deployment --launch-type "FARGATE""
         }
     }
     
