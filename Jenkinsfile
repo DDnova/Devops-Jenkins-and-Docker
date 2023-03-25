@@ -48,7 +48,7 @@ pipeline {
         script {
           // Register the task definition
           def taskDefinition = sh(
-            script: "aws ecs register-task-definition --family ${TASK_DEFINITION_NAME}",
+            script: "aws ecs register-task-definition --family ${TASK_DEFINITION_NAME} --container-definitions '[{\"name\":\"${IMAGE_REPO_NAME}\",\"image\":\"${REPOSITORY_URI}:${IMAGE_TAG}\",\"portMappings\":[{\"containerPort\":3000}],\"essential\":true}]'",
             returnStdout: true
           )
 
