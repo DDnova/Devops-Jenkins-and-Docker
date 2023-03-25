@@ -46,7 +46,7 @@ pipeline {
     stage('Deploy to ECS') {
       steps {
         // Register a new task definition
-        sh "aws ecs register-task-definition --family ${TASK_DEFINITION_NAME} --container-definitions '[{\"name\":\"${IMAGE_REPO_NAME}\",\"image\":\"${REPOSITORY_URI}:${IMAGE_TAG}\",\"portMappings\":[{\"containerPort\":3000}],\"essential\":true,"memoryReservation":512}]'"
+        sh "aws ecs register-task-definition --family ${TASK_DEFINITION_NAME} --container-definitions '[{\"name\":\"${IMAGE_REPO_NAME}\",\"image\":\"${REPOSITORY_URI}:${IMAGE_TAG}\",\"portMappings\":[{\"containerPort\":3000}],\"essential\":true,\"memoryReservation\":512}]'"
 
         // Update the service on ECS to use the new task definition
         sh "aws ecs update-service --cluster ${CLUSTER_NAME} --service ${SERVICE_NAME} --force-new-deployment --desired-count ${DESIRED_COUNT} --task-definition ${TASK_DEFINITION_NAME}:${env.BUILD_ID}"
