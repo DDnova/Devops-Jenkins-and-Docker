@@ -32,18 +32,15 @@ pipeline {
         sh "docker build -t ${REPOSITORY_URI}:${IMAGE_TAG} ."
 
         // Push the Docker image to ECR
-        sh "docker push ${REPOSITORY_URI}:${IMAGE_TAG}"
+        //sh "docker push ${REPOSITORY_URI}:${IMAGE_TAG}"
       }
     }
 
 
-    stage('Deploy to ECS') {
+    stage('Deploy') {
       steps {
-        // Register a new task definition
-        sh "aws ecs register-task-definition --family ${TASK_DEFINITION_NAME} --container-definitions '[{\"name\":\"${IMAGE_REPO_NAME}\",\"image\":\"${REPOSITORY_URI}:${IMAGE_TAG}\",\"portMappings\":[{\"containerPort\":3000}],\"essential\":true}]'"
-
-        // Update the service on ECS to use the new task definition
-        sh "aws ecs update-service --cluster ${CLUSTER_NAME} --service ${SERVICE_NAME} --force-new-deployment --desired-count ${DESIRED_COUNT} --task-definition ${TASK_DEFINITION_NAME}:${env.BUILD_ID}"
+        sh "docker tag ${IMAGE_REPO_NAME}:${IMAGE_TAG} ${REPOSITORY_URI}:$IMAGE_TAG"
+        sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}" 
       }
     }
   }
