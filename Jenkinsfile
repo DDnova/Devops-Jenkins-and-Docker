@@ -48,7 +48,7 @@ pipeline {
         script {
           // Register the task definition
           def taskDefinition = sh(
-            script: "aws ecs register-task-definition --family ${TASK_DEFINITION_NAME} --container-definitions file://ecs-container-definition.json",
+            script: "aws ecs register-task-definition --family ${TASK_DEFINITION_NAME}",
             returnStdout: true
           )
 
