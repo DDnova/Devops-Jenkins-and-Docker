@@ -43,21 +43,15 @@ pipeline {
       }
     }
     
-    stage('Deploy in ECS') {
-       steps {
-          withCredentials([string(credentialsId: 'AWS_EXECUTION_ROL_SECRET', variable: 'AWS_ECS_EXECUTION_ROL'),string(credentialsId: 'AWS_REPOSITORY_URL_SECRET', variable: 'AWS_ECR_URL')]) {
-      script {
-        updateContainerDefinitionJsonWithImageVersion()
-        sh("/usr/local/bin/aws ecs register-task-definition --region ${AWS_DEFAULT_REGION} --family ${TASK_DEFINITION_NAME}")
-        def taskRevision = sh(script: "/usr/local/bin/aws ecs describe-task-definition --task-definition ${AWS_ECS_TASK_DEFINITION} | egrep \"revision\" | tr \"/\" \" \" | awk '{print \$2}' | sed 's/\"\$//'", returnStdout: true)
-        sh("/usr/local/bin/aws ecs update-service --cluster ${CLUSTER_NAME} --service ${SERVICE_NAME} --task-definition ${TASK_DEFINITION_NAME}:${taskRevision}")
-              }
-           }
-        }
-      
+    stage('Deploy to ECS') {
+      steps {
+        // Register a new task definition
+        sh "aws ecs register-task-definition --family ${TASK_DEFINITION_NAME} --container-definitions '[{\"name\":\"${IMAGE_REPO_NAME}\",\"image\":\"${REPOSITORY_URI}:${IMAGE_TAG}\",\"portMappings\":[{\"containerPort\":3000}],\"essential\":true}]'"
+
+        // Update the service on ECS to use the new task definition
+        sh "aws ecs update-service --cluster ${CLUSTER_NAME} --service ${SERVICE_NAME} --force-new-deployment --desired-count ${DESIRED_COUNT} --task-definition ${TASK_DEFINITION_NAME}:${env.BUILD_ID}"
+      }
     }
-    
-    
     
   }
 }
