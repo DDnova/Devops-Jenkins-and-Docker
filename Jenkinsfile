@@ -31,12 +31,13 @@ pipeline {
     
     stage('Pushing to ECR') {
       steps {
-        
+         // Logging into AWS ECR
         script {
-          // Logging into AWS ECR
           sh “aws ecr get-login-password — region ${AWS_DEFAULT_REGION} | docker login — username AWS — password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com”
-          
-          // Uploading Docker images into AWS ECR
+        }
+        
+        // Uploading Docker images into AWS ECR
+        script {
           def imageName = "my-express-app:${env.BUILD_NUMBER}"
           def containerName = "my-express-container"
 
