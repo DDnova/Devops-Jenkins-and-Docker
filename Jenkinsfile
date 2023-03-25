@@ -15,15 +15,18 @@ pipeline {
   }
 
   stages {
+    stage('Logging into AWS ECR') {
+        steps {
+          script {
+             sh 'aws ecr get-login-password — region ${AWS_DEFAULT_REGION} | docker login — username AWS — password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com'
+              }
+          }
+       }
     stage('Build') {
       steps {
         // Checkout the code from the Git repository
         checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/DDnova/express.git']]])
 
-        // Login to Amazon ECR
-        withCredentials([string(credentialsId: "${registryCredential}", variable: 'REGISTRY_CREDENTIALS')]) {
-          sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
-        }
 
         // Build the Docker image
         sh "docker build -t ${REPOSITORY_URI}:${IMAGE_TAG} ."
