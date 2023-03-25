@@ -41,10 +41,13 @@ pipeline {
 
         // Run a new container from the built image
         script {
-          def imageName = "my-express-app:${env.BUILD_NUMBER}"
-          def containerName = "my-express-container"
+         // def imageName = "my-app:${env.BUILD_NUMBER}"
 
-          sh "docker run -p 3000:3000 -d --name $containerName $imageName"
+          // Register the task definition
+          sh "aws ecs register-task-definition --family $TASK_DEFINITION_NAME --container-definitions '[{\"name\":\"my-container\",\"image\":\"$IMAGE_REPO_NAME\",\"portMappings\":[{\"containerPort\":3000}]}]'"
+
+          // Update the ECS service with the new task definition
+          sh "aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --task-definition $TASK_DEFINITION_NAME"
         }
       }
     }
