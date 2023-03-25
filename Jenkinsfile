@@ -45,20 +45,20 @@ pipeline {
     
     stage('Deploy to ECS') {
       steps {
+        script {
+          // Register the task definition
+          def taskDefinition = sh(
+            script: "aws ecs register-task-definition --family ${TASK_DEFINITION_NAME} --container-definitions file://ecs-container-definition.json",
+            returnStdout: true
+          )
+
           // Extract the revision number from the task definition ARN
-           def revision = taskDefinition =~ /revision:\s(\d+)/
-           def taskRevision = revision[0][1]
-        
-            // Update the service with the new task definition
-            sh "aws ecs update-service --cluster ${CLUSTER_NAME} --service ${SERVICE_NAME} --task-definition ${TASK_DEFINITION_NAME}:${taskRevision} --desired-count ${DESIRED_COUNT}"
+          def revision = taskDefinition.stdout =~ /revision:\s(\d+)/
+          def taskRevision = revision[0][1]
 
-        // Register a new task-definition
-        //sh "aws ecs register-task-definition --family ${TASK_DEFINITION_NAME}   --container-definitions '[{\"name\":\"${IMAGE_REPO_NAME}\",\"image\":\"${REPOSITORY_URI}:${IMAGE_TAG}\",\"portMappings\":[{\"containerPort\":3000}],\"essential\":true,\"memoryReservation\":128}]'"
-
-        // Update the service on ECS to use the new task definition
-    
-       // sh "aws ecs update-service --cluster ${CLUSTER_NAME} --service ${SERVICE_NAME} --force-new-deployment --desired-count ${DESIRED_COUNT} --task-definition ${TASK_DEFINITION_NAME} "
-        
+          // Update the service with the new task definition
+          sh "aws ecs update-service --cluster ${CLUSTER_NAME} --service ${SERVICE_NAME} --task-definition ${TASK_DEFINITION_NAME}:${taskRevision} --desired-count ${DESIRED_COUNT}"
+        }
       }
     }
     
