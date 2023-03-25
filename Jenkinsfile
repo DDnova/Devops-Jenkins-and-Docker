@@ -46,7 +46,7 @@ pipeline {
     stage('Deploy to ECS') {
       steps {
         // Register a new task-definition
-        sh "aws ecs register-task-definition --family ${TASK_DEFINITION_NAME} --requiresCompatibilities 'FARGATE'  --container-definitions '[{\"name\":\"${IMAGE_REPO_NAME}\",\"image\":\"${REPOSITORY_URI}:${IMAGE_TAG}\",\"portMappings\":[{\"containerPort\":3000}],\"essential\":true,\"memoryReservation\":128}]'"
+        sh "aws ecs register-task-definition --family ${TASK_DEFINITION_NAME} --requires-compatibilities 'FARGATE'  --container-definitions '[{\"name\":\"${IMAGE_REPO_NAME}\",\"image\":\"${REPOSITORY_URI}:${IMAGE_TAG}\",\"portMappings\":[{\"containerPort\":3000}],\"essential\":true,\"memoryReservation\":128}]'"
 
         // Update the service on ECS to use the new task definition
     
