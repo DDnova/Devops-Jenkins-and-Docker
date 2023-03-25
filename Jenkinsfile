@@ -10,7 +10,7 @@ pipeline {
         IMAGE_REPO_NAME="express-test"
         IMAGE_TAG="${env.BUILD_ID}"
         REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
-        registryCredential = "aws-express-appp"
+        registryCredential = "aws-admin-user"
       }
 
   stages {
