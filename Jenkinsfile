@@ -12,6 +12,7 @@ pipeline {
     IMAGE_TAG="${env.BUILD_ID}"
     REPOSITORY_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
     registryCredential = "aws-admin-user"
+    TASK_REVISION= sh "aws ecs describe-task-definition --task-definition ${TASK_DEFINITION_NAME} | egrep "revision" | tr "/" " " | awk '{print $2}' | sed 's/"$//'"
   }
 
   stages {
