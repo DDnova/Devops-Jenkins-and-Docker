@@ -6,7 +6,7 @@ pipeline {
     AWS_DEFAULT_REGION="us-east-1"
     CLUSTER_NAME="default"
     SERVICE_NAME="nodejs-container-service"
-    TASK_DEFINITION_NAME="first-run-task-definition"
+    TASK_DEFINITION_NAME="arn:aws:ecs:us-east-1:168546287356:task-definition/first-run-task-definition"
     DESIRED_COUNT="1"
     IMAGE_REPO_NAME="express-test"
     IMAGE_TAG="${env.BUILD_ID}"
@@ -49,9 +49,8 @@ pipeline {
         sh "aws ecs register-task-definition --family ${TASK_DEFINITION_NAME} --container-definitions '[{\"name\":\"${IMAGE_REPO_NAME}\",\"image\":\"${REPOSITORY_URI}:${IMAGE_TAG}\",\"portMappings\":[{\"containerPort\":3000}],\"essential\":true,\"memoryReservation\":128}]'"
 
         // Update the service on ECS to use the new task definition
-       def LATEST_TASK_DEFINITION = sh(script: "aws ecs describe-task-definition --task-definition ${TASK_DEFINITION_NAME}:latest --query 'taskDefinition.taskDefinitionArn' --output text", returnStdout: true).trim()
- 
-        sh "aws ecs update-service --cluster ${CLUSTER_NAME} --service ${SERVICE_NAME} --force-new-deployment --desired-count ${DESIRED_COUNT} --task-definition ${LATEST_TASK_DEFINITION}"
+
+        sh "aws ecs update-service --cluster ${CLUSTER_NAME} --service ${SERVICE_NAME}  --desired-count ${DESIRED_COUNT} --task-definition ${TASK_DEFINITION_NAME}"
         }
     }
     
