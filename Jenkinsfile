@@ -51,16 +51,25 @@ pipeline {
             script: "aws ecs register-task-definition --family ${TASK_DEFINITION_NAME} --container-definitions '[{\"name\":\"${IMAGE_REPO_NAME}\",\"image\":\"${REPOSITORY_URI}:${IMAGE_TAG}\",\"portMappings\":[{\"containerPort\":3000}],\"essential\":true}]'",
             returnStdout: true
           )
-
-          // Extract the revision number from the task definition ARN
-          def revision = taskDefinition.stdout =~ /revision:\s(\d+)/
-          def taskRevision = revision[0][1]
-
+          
+        // Get the last registered [TaskDefinition#revision]
+        def taskRevision = sh (
+          returnStdout: true,
+          script:  "                                                              \
+            aws ecs describe-task-definition  --task-definition ${taskFamily}     \
+                                              | egrep 'revision'                  \
+                                              | tr ',' ' '                        \
+                                              | awk '{print \$2}'                 \
+          "
+        ).trim()
+          
           // Update the service with the new task definition
           sh "aws ecs update-service --cluster ${CLUSTER_NAME} --service ${SERVICE_NAME} --task-definition ${TASK_DEFINITION_NAME}:${taskRevision} --desired-count ${DESIRED_COUNT}"
         }
       }
     }
+    
+    
     
   }
 }
