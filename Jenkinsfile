@@ -56,7 +56,7 @@ pipeline {
         def taskRevision = sh (
           returnStdout: true,
           script:  "                                                              \
-            aws ecs describe-task-definition  --task-definition ${taskFamily}     \
+            aws ecs describe-task-definition  --task-definition ${TASK_DEFINITION_NAME}     \
                                               | egrep 'revision'                  \
                                               | tr ',' ' '                        \
                                               | awk '{print \$2}'                 \
