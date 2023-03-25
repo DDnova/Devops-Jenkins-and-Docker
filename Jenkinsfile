@@ -12,8 +12,7 @@ pipeline {
     IMAGE_TAG="${env.BUILD_ID}"
     REPOSITORY_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
     registryCredential = "aws-admin-user"
-    TASK_REVISION= sh "aws ecs describe-task-definition --task-definition ${TASK_DEFINITION_NAME} | egrep "revision" | tr '/' ' ' | awk '{print $2}' | sed 's/'$//'"
-  }
+   }
 
   stages {
     stage('Logging into AWS ECR') {
@@ -46,13 +45,22 @@ pipeline {
     
     stage('Deploy to ECS') {
       steps {
+          // Extract the revision number from the task definition ARN
+           def revision = taskDefinition =~ /revision:\s(\d+)/
+           def taskRevision = revision[0][1]
+        
+            // Update the service with the new task definition
+            sh "aws ecs update-service --cluster ${CLUSTER_NAME} --service ${SERVICE_NAME} --task-definition ${TASK_DEFINITION_NAME}:${taskRevision} --desired-count ${DESIRED_COUNT}"
+          }
+
         // Register a new task-definition
-        sh "aws ecs register-task-definition --family ${TASK_DEFINITION_NAME}   --container-definitions '[{\"name\":\"${IMAGE_REPO_NAME}\",\"image\":\"${REPOSITORY_URI}:${IMAGE_TAG}\",\"portMappings\":[{\"containerPort\":3000}],\"essential\":true,\"memoryReservation\":128}]'"
+        //sh "aws ecs register-task-definition --family ${TASK_DEFINITION_NAME}   --container-definitions '[{\"name\":\"${IMAGE_REPO_NAME}\",\"image\":\"${REPOSITORY_URI}:${IMAGE_TAG}\",\"portMappings\":[{\"containerPort\":3000}],\"essential\":true,\"memoryReservation\":128}]'"
 
         // Update the service on ECS to use the new task definition
     
-        sh "aws ecs update-service --cluster ${CLUSTER_NAME} --service ${SERVICE_NAME} --force-new-deployment --desired-count ${DESIRED_COUNT} --task-definition ${TASK_DEFINITION_NAME} "
-        }
+       // sh "aws ecs update-service --cluster ${CLUSTER_NAME} --service ${SERVICE_NAME} --force-new-deployment --desired-count ${DESIRED_COUNT} --task-definition ${TASK_DEFINITION_NAME} "
+        
+      }
     }
     
   }
