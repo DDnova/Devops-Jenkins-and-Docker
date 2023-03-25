@@ -63,8 +63,8 @@ pipeline {
           "
         ).trim()
           
-          // Update the service with the new task definition
-          sh "aws ecs update-service --cluster ${CLUSTER_NAME} --service ${SERVICE_NAME} --task-definition ${TASK_DEFINITION_NAME}:${taskRevision} --desired-count ${DESIRED_COUNT}"
+          // Update the service with the new task definition --task-definition ${TASK_DEFINITION_NAME}:${taskRevision}
+          sh "aws ecs update-service --cluster ${CLUSTER_NAME} --service ${SERVICE_NAME}  --desired-count ${DESIRED_COUNT}"
         }
       }
     }
