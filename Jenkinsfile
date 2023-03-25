@@ -64,7 +64,7 @@ pipeline {
 
           sh "echo '${taskDefinition}' > taskdefinition.json"
 
-          sh "aws ecs register-task-definition --cli-input-json file://taskdefinition.json"
+          aws ecs register-task-definition --cli-input-json '{"family": "first-run-task-definition", "containerDefinitions": [{"name": "express-test", "image": "168546287356.dkr.ecr.us-east-1.amazonaws.com/express-test:10", "portMappings": [{"containerPort": 3000, "hostPort": 3000}], "essential": true}]}'
 
           sh "aws ecs update-service --cluster ${CLUSTER_NAME} --service ${SERVICE_NAME} --force-new-deployment --task-definition ${TASK_DEFINITION_NAME}:${BUILD_NUMBER} --desired-count ${DESIRED_COUNT}"
         }
