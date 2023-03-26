@@ -53,12 +53,12 @@ pipeline {
                 sh """sed -e "s;%REPOSITORY_URI%;${REPOSITORY_URI};g" -e "s;%SHORT_COMMIT%;${SHORT_COMMIT};g" -e "s;%TASK_DEFINITION_NAME%;${TASK_DEFINITION_NAME};g" -e "s;%SERVICE_NAME%;${SERVICE_NAME};g" -e "s;%EXECUTION_ROLE_ARN%;${EXECUTION_ROLE_ARN};g" taskdef_template.json > taskdef_${SHORT_COMMIT}.json"""
                 script {
                     // Register task definition
-                    AWS("ecs register-task-definition --output json --cli-input-json file://${WORKSPACE}/taskdef_${SHORT_COMMIT}.json > ${env.WORKSPACE}/temp.json")
+                    sh "aws ecs register-task-definition --output json --cli-input-json file://${WORKSPACE}/taskdef_${SHORT_COMMIT}.json > ${env.WORKSPACE}/temp.json"
                     def projects = readJSON file: "${env.WORKSPACE}/temp.json"
                     def TASK_REVISION = projects.taskDefinition.revision
 
                     // update service
-                    AWS("ecs update-service --cluster ${CLUSTER_NAME} --service ${SERVICE_NAME} --task-definition ${TASK_DEFINITION_NAME}:${TASK_REVISION} --desired-count ${DESIRED_COUNT}")
+                    sh "aws ecs update-service --cluster ${CLUSTER_NAME} --service ${SERVICE_NAME} --task-definition ${TASK_DEFINITION_NAME}:${TASK_REVISION} --desired-count ${DESIRED_COUNT}"
                 }
       }
     }
