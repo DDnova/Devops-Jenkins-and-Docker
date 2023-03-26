@@ -5,7 +5,7 @@ var express = require('../../');
 var app = module.exports = express()
 
 app.get('/', function(req, res){
-  res.send('This is a demo of ci cd pipeline');
+  res.send('Hello World 2');
 });
 
 /* istanbul ignore next */
