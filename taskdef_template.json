@@ -6,7 +6,7 @@
     {
       "image": "%REPOSITORY_URI%:%SHORT_COMMIT%",
       "name": "%SERVICE_NAME%",
-      "cpu": 2,
+      "cpu": 10,
       "memory": 256,
       "essential": true,
       "portMappings": [
