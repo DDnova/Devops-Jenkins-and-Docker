@@ -59,6 +59,7 @@ pipeline {
 
                     // update service
                     AWS("ecs update-service --cluster ${CLUSTER_NAME} --service ${SERVICE_NAME} --task-definition ${TASK_DEFINITION_NAME}:${TASK_REVISION} --desired-count ${DESIRED_COUNT}")
+                }
       }
     }
     
