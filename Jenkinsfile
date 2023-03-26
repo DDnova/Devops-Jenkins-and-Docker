@@ -50,7 +50,8 @@ pipeline {
     stage('Deploy to ECS') {
       steps {
             // prepare task definition file
-                sh """sed -e "s;%REPOSITORY_URI%;${REPOSITORY_URI};g" -e "s;%SHORT_COMMIT%;${SHORT_COMMIT};g" -e "s;%TASK_DEFINITION_NAME%;${TASK_DEFINITION_NAME};g" -e "s;%SERVICE_NAME%;${SERVICE_NAME};%EXECUTION_ROLE_ARN%;${EXECUTION_ROLE_ARN};g" -e "s;g" taskdef_template.json > taskdef_${SHORT_COMMIT}.json"""
+                 sh """sed -e "s;%REPOSITORY_URI%;${REPOSITORY_URI};g" -e "s;%SHORT_COMMIT%;${SHORT_COMMIT};g" -e "s;%TASK_DEFINITION_NAME%;${TASK_DEFINITION_NAME};g" -e "s;%SERVICE_NAME%;${SERVICE_NAME};g" -e "s;%EXECUTION_ROLE_ARN%;${EXECUTION_ROLE_ARN};g" taskdef_template.json > taskdef_${SHORT_COMMIT}.json"""
+                
                 script {
                     // Register task definition
                     sh "aws ecs register-task-definition --output json --cli-input-json file://${WORKSPACE}/taskdef_${SHORT_COMMIT}.json > ${env.WORKSPACE}/temp.json"
