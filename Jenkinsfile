@@ -13,7 +13,7 @@ pipeline {
     REPOSITORY_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
     registryCredential = "aws-admin-user"
     
-    EXECUTION_ROLE_ARN = "arn:aws:iam::168546287356:role/ecs-role"
+    EXECUTION_ROLE_ARN = "arn:aws:iam::168546287356:role/ecsTaskExecutionRole"
     SHORT_COMMIT = "${GIT_COMMIT[0..7]}"
    }
 
