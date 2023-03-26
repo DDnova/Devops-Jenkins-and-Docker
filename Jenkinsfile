@@ -12,6 +12,9 @@ pipeline {
     IMAGE_TAG="${env.BUILD_ID}"
     REPOSITORY_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
     registryCredential = "aws-admin-user"
+    
+    EXECUTION_ROLE_ARN = "arn:aws:iam::xxxxxxxxxxxx:role/ecsTaskExecutionRole"
+    SHORT_COMMIT = "${GIT_COMMIT[0..7]}"
    }
 
   stages {
@@ -48,24 +51,36 @@ pipeline {
       steps {
         script {
           // Register the task definition
-          def taskDefinition = sh(
-            script: "aws ecs register-task-definition --required-compatibilities 'FARGATE' --family ${TASK_DEFINITION_NAME} --memory 248 --container-definitions '[{\"name\":\"${IMAGE_REPO_NAME}\",\"image\":\"${REPOSITORY_URI}:${IMAGE_TAG}\",\"portMappings\":[{\"containerPort\":3000}],\"essential\":true}]'",
-            returnStdout: true
-          )
+//           def taskDefinition = sh(
+//             script: "aws ecs register-task-definition --required-compatibilities 'FARGATE' --family ${TASK_DEFINITION_NAME} --memory 248 --container-definitions '[{\"name\":\"${IMAGE_REPO_NAME}\",\"image\":\"${REPOSITORY_URI}:${IMAGE_TAG}\",\"portMappings\":[{\"containerPort\":3000}],\"essential\":true}]'",
+//             returnStdout: true
+//           )
           
-        // Get the last registered [TaskDefinition#revision]
-        def taskRevision = sh (
-          returnStdout: true,
-          script:  "                                                              \
-            aws ecs describe-task-definition  --task-definition ${TASK_DEFINITION_NAME}     \
-                                              | egrep 'revision'                  \
-                                              | tr ',' ' '                        \
-                                              | awk '{print \$2}'                 \
-          "
-        ).trim()
+//         // Get the last registered [TaskDefinition#revision]
+//         def taskRevision = sh (
+//           returnStdout: true,
+//           script:  "                                                              \
+//             aws ecs describe-task-definition  --task-definition ${TASK_DEFINITION_NAME}     \
+//                                               | egrep 'revision'                  \
+//                                               | tr ',' ' '                        \
+//                                               | awk '{print \$2}'                 \
+//           "
+//         ).trim()
           
-          // Update the service with the new task definition --task-definition ${TASK_DEFINITION_NAME}:${taskRevision}
-          sh "aws ecs update-service --cluster ${CLUSTER_NAME} --service ${SERVICE_NAME}  --desired-count ${DESIRED_COUNT} --task-definition ${TASK_DEFINITION_NAME}:${taskRevision}"
+//           // Update the service with the new task definition --task-definition ${TASK_DEFINITION_NAME}:${taskRevision}
+//           sh "aws ecs update-service --cluster ${CLUSTER_NAME} --service ${SERVICE_NAME}  --desired-count ${DESIRED_COUNT} --task-definition ${TASK_DEFINITION_NAME}:${taskRevision}"
+//         
+            // prepare task definition file
+                sh """sed -e "s;%REPOSITORY_URI%;${REPOSITORY_URI};g" -e "s;%SHORT_COMMIT%;${SHORT_COMMIT};g" -e "s;%TASK_DEFINITION_NAME%;${TASK_DEFINITION_NAME};g" -e "s;%SERVICE_NAME%;${SERVICE_NAME};g" -e "s;%EXECUTION_ROLE_ARN%;${EXECUTION_ROLE_ARN};g" taskdef_template.json > taskdef_${SHORT_COMMIT}.json"""
+                script {
+                    // Register task definition
+                    AWS("ecs register-task-definition --output json --cli-input-json file://${WORKSPACE}/taskdef_${SHORT_COMMIT}.json > ${env.WORKSPACE}/temp.json")
+                    def projects = readJSON file: "${env.WORKSPACE}/temp.json"
+                    def TASK_REVISION = projects.taskDefinition.revision
+
+                    // update service
+                    AWS("ecs update-service --cluster ${CLUSTER_NAME} --service ${SERVICE_NAME} --task-definition ${TASK_DEFINITION_NAME}:${TASK_REVISION} --desired-count ${DESIRED_COUNT}")
+               
         }
       }
     }
