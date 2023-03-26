@@ -1,5 +1,3 @@
-@Library('github.com/releaseworks/jenkinslib') _
-
 pipeline {
   agent any
 
@@ -34,7 +32,6 @@ pipeline {
 
 
         // Build the Docker image
-        def dockerImage = docker.build("$REPOSITORY_URI", ".")
         sh "docker build -t ${REPOSITORY_URI}:${IMAGE_TAG} ."
 
         // Push the Docker image to ECR
@@ -46,11 +43,7 @@ pipeline {
     stage('Push Image to ECR') {
       steps {
        // sh "docker tag ${IMAGE_REPO_NAME}:${IMAGE_TAG} ${REPOSITORY_URI}:$IMAGE_TAG"
-         // Push to ECR
-        withElasticContainerRegistry {
-                        docker.image("$REPOSITORY_URI").push("$SHORT_COMMIT")
-                    }
-        //sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}" 
+        sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}" 
       }
     }
     
@@ -71,12 +64,6 @@ pipeline {
       }
     }
     
-            stage('Remove docker image') {
-            steps{
-                // Remove images
-                sh "docker rmi $REPOSITORY_URI"
-            }
-        }
     
     
   }
