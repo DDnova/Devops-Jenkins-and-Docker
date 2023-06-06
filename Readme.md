@@ -1,6 +1,6 @@
 The necessary files are the Jenkinsfile and the Dockerfile
 
-Using that we are using a CI/CD pipeline to deploy to and EC2 insstance in AWS
+Using that we are using a CI/CD pipeline to deploy to an EC2 insstance in AWS
 
 [![Express Logo](https://i.cloudup.com/zfY6lL7eFa-3000x3000.png)](http://expressjs.com/)
 
